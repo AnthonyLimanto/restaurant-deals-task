@@ -1,6 +1,8 @@
 package com.anthonylimanto.restaurant_deals_task.controller;
 
 import com.anthonylimanto.restaurant_deals_task.api.DealsResponse;
+import com.anthonylimanto.restaurant_deals_task.api.PeakResponse;
+import com.anthonylimanto.restaurant_deals_task.service.DealWindow;
 import com.anthonylimanto.restaurant_deals_task.service.RestaurantDealsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,5 +24,13 @@ public class DealsController {
     public DealsResponse getDeals(@RequestParam String timeOfDay) {
 
         return new DealsResponse(restaurantDealsService.findActiveDeals(timeOfDay));
+    }
+
+    @GetMapping("/peak")
+    public PeakResponse getPeakWindow() {
+
+        DealWindow peakTimeWindow = restaurantDealsService.findPeakTime();
+
+        return new PeakResponse(peakTimeWindow.start().toString(), peakTimeWindow.end().toString());
     }
 }

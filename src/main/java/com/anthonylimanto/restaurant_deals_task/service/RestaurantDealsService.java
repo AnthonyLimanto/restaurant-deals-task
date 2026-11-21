@@ -7,9 +7,9 @@ import com.anthonylimanto.restaurant_deals_task.source.Restaurant;
 import com.anthonylimanto.restaurant_deals_task.source.RestaurantSource;
 import org.springframework.stereotype.Service;
 
-import java.sql.Time;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -19,6 +19,11 @@ public class RestaurantDealsService {
     public RestaurantDealsService(RestaurantSource restaurantSource) {
         this.restaurantSource = restaurantSource;
     }
+
+    private enum EventType { END, START }
+
+    // A time event is the start time or end time of a deal, type refers to if it's a start or end time
+    private record TimeEvent(LocalTime time, EventType type) {}
 
     public List<DealItem> findActiveDeals(String timeOfDay) {
         LocalTime time = TimeHelper.parseTime(timeOfDay);
@@ -35,17 +40,72 @@ public class RestaurantDealsService {
         return activeDeals;
     }
 
-    private boolean isActive(Restaurant restaurant, Deal deal, LocalTime time) {
+    public DealWindow findPeakTime() {
+
+        List<TimeEvent> events = new ArrayList<>();
+
+        for (Restaurant restaurant : restaurantSource.fetchRestaurants()) {
+            for (Deal deal : restaurant.deals()) {
+                DealWindow dealWindow = resolveWindow(restaurant, deal);
+                if (dealWindow != null) {
+                    events.add(new TimeEvent(dealWindow.start(), EventType.START));
+                    events.add(new TimeEvent(dealWindow.end(), EventType.END));
+                }
+            }
+        }
+
+        // In the event the time of 2 events is the same the one that is of type end will go first, this is because a deal's valid time has inclusive start time and exclusive end time
+        events.sort(Comparator.comparing(TimeEvent::time)
+                .thenComparing(TimeEvent::type));
+
+        int maxAmountOfDeals = 0;
+        int currCount = 0;
+
+        for (TimeEvent timeEvent : events) {
+            if (timeEvent.type() == EventType.START) {
+                currCount++;
+                maxAmountOfDeals = Math.max(maxAmountOfDeals, currCount);
+            } else {
+                currCount--;
+            }
+        }
+
+        currCount = 0;
+        LocalTime peakStart = null;
+        LocalTime peakEnd = null;
+
+        for (TimeEvent timeEvent : events) {
+            if (timeEvent.type() == EventType.START) {
+                currCount++;
+            } else {
+                currCount--;
+            }
+
+            if (peakStart == null && currCount == maxAmountOfDeals) {
+                peakStart = timeEvent.time();
+            } else if (peakStart != null && currCount < maxAmountOfDeals) {
+                peakEnd = timeEvent.time();
+                break;
+            }
+        }
+
+        return new DealWindow(peakStart, peakEnd);
+    }
+
+    private static DealWindow resolveWindow(Restaurant restaurant, Deal deal) {
         String startText = firstNonNull(deal.open(), deal.start(), restaurant.open());
         String endText = firstNonNull(deal.close(), deal.end(), restaurant.close());
         if (startText == null || endText == null) {
-            return false;
+            return null;
         }
-
-        LocalTime start = TimeHelper.parseTime(startText);
-        LocalTime end = TimeHelper.parseTime(endText);
-        return isWithin(time, start, end);
+        return new DealWindow(TimeHelper.parseTime(startText), TimeHelper.parseTime(endText));
     }
+
+    private boolean isActive(Restaurant restaurant, Deal deal, LocalTime time) {
+        DealWindow window = resolveWindow(restaurant, deal);
+        return window != null && isWithin(time, window.start(), window.end());
+    }
+
 
     /**
      * Start is inclusive and end is exclusive.
