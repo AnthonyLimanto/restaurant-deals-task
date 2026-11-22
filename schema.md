@@ -63,6 +63,8 @@ PostgreSQL itself can reject bad data by using foreign keys and typed columns.
 - Deals have their own key. The source has two deals with the same `objectId`.
   Because of this each deal has its own id for the PK. The source value is kept in `external_id`.
 
+- The restaurant `id` is the source `objectId`. I assume that restaurant ids are unique, which is true in the supplied data.
+
 - Cuisines have their own table, and a join table links them to restaurants. 
   Each cuisine name is stored one time, and a search by cuisine can use an index.
 
