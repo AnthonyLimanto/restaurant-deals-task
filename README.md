@@ -24,7 +24,7 @@ Peak: 5:00pm to 9:00pm.
 - The source data is correct, deals that are available outside of restaurant hours are valid.
 - Deal times come from `open`/`close`, then `start`/`end`, then the restaurant hours.
 - The start time of a deal is inclusive and the end is exclusive.
-- The peak is the longest window with the maximum number of active deals.
+- The peak is the first window with the maximum number of active deals.
   It assumes that no window crosses midnight.
 - The task spec spells one field `restarantSuburb`. I assumed was a typo and fixed it as `restaurantSuburb`.
 
