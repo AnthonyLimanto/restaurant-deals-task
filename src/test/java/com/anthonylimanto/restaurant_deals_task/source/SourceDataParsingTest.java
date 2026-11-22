@@ -1,6 +1,5 @@
-import com.anthonylimanto.restaurant_deals_task.source.Deal;
-import com.anthonylimanto.restaurant_deals_task.source.Restaurant;
-import com.anthonylimanto.restaurant_deals_task.source.RestaurantList;
+package com.anthonylimanto.restaurant_deals_task.source;
+
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.json.JsonMapper;
 
