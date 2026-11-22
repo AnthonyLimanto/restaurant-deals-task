@@ -15,4 +15,11 @@ public record Restaurant(
         String open,
         String close,
         List<Deal> deals
-) {}
+) {
+    public Restaurant {
+        if (deals == null) {
+            deals = List.of();
+        }
+    }
+}
+

@@ -132,7 +132,7 @@ public class RestaurantDealsService {
         return null;
     }
 
-    public static DealItem toDealItem(Restaurant restaurant, Deal deal) {
+    private static DealItem toDealItem(Restaurant restaurant, Deal deal) {
         return new DealItem(
                 restaurant.objectId(),
                 restaurant.name(),
