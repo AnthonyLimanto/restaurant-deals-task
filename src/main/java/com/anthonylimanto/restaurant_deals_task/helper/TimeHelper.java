@@ -10,6 +10,9 @@ import java.util.Locale;
 
 public final class TimeHelper {
 
+    private static final DateTimeFormatter OUTPUT_FORMAT =
+            DateTimeFormatter.ofPattern("h:mma", Locale.ENGLISH);
+
     private static final DateTimeFormatter TWELVE_HOUR = new DateTimeFormatterBuilder()
             .parseCaseInsensitive()
             .appendPattern("h:mma")
@@ -29,4 +32,9 @@ public final class TimeHelper {
             }
         }
     }
+
+    public static String formatTime(LocalTime time) {
+        return OUTPUT_FORMAT.format(time).toLowerCase(Locale.ENGLISH);
+    }
+
 }

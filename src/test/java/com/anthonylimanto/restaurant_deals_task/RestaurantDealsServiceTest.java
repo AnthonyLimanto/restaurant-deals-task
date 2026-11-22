@@ -1,11 +1,13 @@
 package com.anthonylimanto.restaurant_deals_task;
 
 import com.anthonylimanto.restaurant_deals_task.api.DealItem;
+import com.anthonylimanto.restaurant_deals_task.service.DealWindow;
 import com.anthonylimanto.restaurant_deals_task.service.RestaurantDealsService;
 import com.anthonylimanto.restaurant_deals_task.source.FileRestaurantSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,6 +44,23 @@ public class RestaurantDealsServiceTest {
         List<DealItem> deals = service.findActiveDeals("9:00pm");
 
         assertEquals(4, deals.size());
+    }
+
+    @Test
+    void findsThePeakWindowInTheSavedData() {
+        RestaurantDealsService service = new RestaurantDealsService(new FileRestaurantSource());
+
+        DealWindow peak = service.findPeakTime().orElseThrow();
+
+        assertEquals(LocalTime.of(17, 0), peak.start());
+        assertEquals(LocalTime.of(21, 0), peak.end());
+    }
+
+    @Test
+    void returnsNoPeakWhenThereAreNoDeals() {
+        RestaurantDealsService service = new RestaurantDealsService(List::of);
+
+        assertTrue(service.findPeakTime().isEmpty());
     }
 
     private static boolean hasRestaurant(List<DealItem> deals, String name) {

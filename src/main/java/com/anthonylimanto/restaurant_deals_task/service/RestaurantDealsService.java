@@ -11,6 +11,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class RestaurantDealsService {
@@ -40,7 +41,7 @@ public class RestaurantDealsService {
         return activeDeals;
     }
 
-    public DealWindow findPeakTime() {
+    public Optional<DealWindow> findPeakTime() {
 
         List<TimeEvent> events = new ArrayList<>();
 
@@ -52,6 +53,10 @@ public class RestaurantDealsService {
                     events.add(new TimeEvent(dealWindow.end(), EventType.END));
                 }
             }
+        }
+
+        if (events.isEmpty()) {
+            return Optional.empty();
         }
 
         // In the event the time of 2 events is the same the one that is of type end will go first, this is because a deal's valid time has inclusive start time and exclusive end time
@@ -89,7 +94,7 @@ public class RestaurantDealsService {
             }
         }
 
-        return new DealWindow(peakStart, peakEnd);
+        return Optional.of(new DealWindow(peakStart, peakEnd));
     }
 
     private static DealWindow resolveWindow(Restaurant restaurant, Deal deal) {

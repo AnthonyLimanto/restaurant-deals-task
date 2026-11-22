@@ -2,14 +2,11 @@ package com.anthonylimanto.restaurant_deals_task.controller;
 
 import com.anthonylimanto.restaurant_deals_task.api.DealsResponse;
 import com.anthonylimanto.restaurant_deals_task.api.PeakResponse;
-import com.anthonylimanto.restaurant_deals_task.service.DealWindow;
+import com.anthonylimanto.restaurant_deals_task.helper.TimeHelper;
 import com.anthonylimanto.restaurant_deals_task.service.RestaurantDealsService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 public class DealsController {
@@ -29,8 +26,10 @@ public class DealsController {
     @GetMapping("/peak")
     public PeakResponse getPeakWindow() {
 
-        DealWindow peakTimeWindow = restaurantDealsService.findPeakTime();
-
-        return new PeakResponse(peakTimeWindow.start().toString(), peakTimeWindow.end().toString());
+        return restaurantDealsService.findPeakTime()
+                .map(w -> new PeakResponse(
+                        TimeHelper.formatTime(w.start()),
+                        TimeHelper.formatTime(w.end())))
+                .orElseGet(() -> new PeakResponse(null, null));
     }
 }
